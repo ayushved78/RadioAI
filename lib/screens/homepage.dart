@@ -1,3 +1,6 @@
+import 'dart:html';
+
+import 'package:audioplayer/audioplayer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +16,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<AIRadio> radios;
+  AIRadio _selectedRadio;
+  Color _sectedColor;
+  bool _isPlaying = false;
 
+  final AudioPlayer _audioPlayer = AudioPlayer();
   @override
   void initState() {
     // TODO: implement initState
@@ -25,6 +32,18 @@ class _HomePageState extends State<HomePage> {
     final radioJson = await rootBundle.loadString("assets/radio.json");
     radios = AIRadioList.fromJson(radioJson).radios;
     print(radios);
+    setState(() {});
+  }
+//work starts here tomorrow   40:00
+  // _audioPlayer.onPlayerStateChanged.listen((Event){
+  //   if (event) {
+
+  //   }
+  // })
+  _playMusic(String url) {
+    _audioPlayer.play(url);
+    _selectedRadio = radios.firstWhere((element) => element.url == url);
+    print(_selectedRadio);
     setState(() {});
   }
 
@@ -111,10 +130,35 @@ class _HomePageState extends State<HomePage> {
                   .withRounded(value: 60.0)
                   .make()
                   .p16()
-                  .onInkDoubleTap(() {})
-                  .centered();
+                  .onInkDoubleTap(() {
+                _playMusic(_selectedRadio.url);
+              });
             },
-          ),
+          ).centered(),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: [
+              if (_isPlaying)
+                "Playing now {_selectedRadio.name} FM"
+                    .text
+                    .white
+                    .xl
+                    .makeCentered(),
+              Icon(
+                _isPlaying
+                    ? CupertinoIcons.play_circle
+                    : CupertinoIcons.stop_circle,
+                color: Colors.white,
+                size: 65.0,
+              ).onInkTap(() {
+                if (_isPlaying) {
+                  _audioPlayer.stop();
+                } else {
+                  _playMusic(_selectedRadio.url);
+                }
+              }),
+            ].vStack(),
+          ).pOnly(bottom: context.percentHeight * 12),
         ],
         clipBehavior: Clip.antiAlias,
         fit: StackFit.expand,
